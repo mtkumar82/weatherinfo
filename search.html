@@ -1,0 +1,195 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Weather Info</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="" />
+<!-- Bootstrap Core CSS -->
+<link href="css/bootstrap.css" rel='stylesheet' type='text/css' />
+<!-- Custom CSS -->
+<link href="css/style.css" rel='stylesheet' type='text/css' />
+<!-- font CSS -->
+<!-- font-awesome icons -->
+<link href="css/font-awesome.css" rel="stylesheet"> 
+<!-- //font-awesome icons -->
+ <!-- js-->
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/modernizr.custom.js"></script>
+<!--webfonts-->
+<link href='//fonts.googleapis.com/css?family=Roboto+Condensed:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<!--//webfonts--> 
+
+<!--Calender-->
+<link rel="stylesheet" href="css/clndr.css" type="text/css" />
+
+<!--End Calender-->
+<!-- Metis Menu -->
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+jquery.dataTables.min.js"></script>
+
+<script src="js/metisMenu.min.js"></script>
+<script src="js/custom.js"></script>
+<link href="css/custom.css" rel="stylesheet">
+<script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.10/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.1.17/vue-resource.js"></script>
+<!--//Metis Menu -->
+</head> 
+<body >
+<div class="main-content">
+ <!-- Left Sidebar -->
+<div class=" sidebar" role="navigation">
+            <div class="navbar-collapse">
+				<nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left cbp-spmenu-open" id="cbp-spmenu-s1">
+					<ul class="nav" id="side-menu">
+					</ul>
+				</nav>
+			</div>
+		</div> 
+<!-- End Left Sidebar -->
+
+<!-- Header -->
+<div class="sticky-header header-section ">
+			<div class="header-left">
+				
+				<!--logo -->
+				<div class="logo">
+					<a href="index.html">
+						<h1>Weather Info</h1>						
+					</a>
+				</div>
+				<!--//logo-->
+				
+				<div class="clearfix"> </div>
+			</div>
+			<div class="header-right">
+				<div class="profile_details_left"><!--notifications of menu start -->
+					
+					<div class="clearfix"> </div>
+				</div>
+				
+				<div class="clearfix"> </div>				
+			</div>
+			<div class="clearfix"> </div>	
+		</div>
+<!-- End Header -->
+
+<!-- main content start-->
+<div id="page-wrapper">
+	<!-- Content Start -->
+
+	
+<div class="main-page">
+
+<div class="container">
+      <div class="row">
+
+	   <div class="col-lg-12" >
+	    <div class="row">
+		<div class="col-xs-6" >
+			  <form name="search" action="search.html" method='GET'>
+			  <input type='text' name='cityname'><input type="submit" name="search" value="Search">
+			  </form>
+		   </div>
+		   </div>
+		 </div>
+		 <div class="clear-both" ><br></div>
+
+	  <div class="col-lg-12" style="border: 1px solid red">
+          <div class="row">
+						   <script src="https://unpkg.com/vue-router"></script>
+							<weather></weather>
+
+					<template id="weather-template">
+						
+						<div class="col-xs-12" class="list-group-item groupdata" v-for="weatherdata in list">
+						<p>&nbsp;<br/></p>
+						<p>Weather report for <b>{{ weatherdata.title}}</b></p>
+						 
+						<p>&nbsp;<br/></p>
+						<div class="col-xs-2" class="list-group-item groupdata" v-for="task in weatherdata.consolidated_weather" >
+						<p>Date: {{ task.applicable_date }}</p>
+						<p>{{ task.weather_state_name }} &nbsp; &nbsp;<img src="https://www.metaweather.com/static/img/weather/{{ task.weather_state_abbr }}.svg" style="width:32px"/></p>
+							<p>Temp: {{ task.the_temp.toLocaleString()}}</p>
+							<p>Min Temp: {{ task.min_temp.toLocaleString() }}</p>
+							<p>Max Temp: {{ task.max_temp.toLocaleString() }}</p>
+							<p>Wind Speed: {{ task.wind_speed.toLocaleString() }}</p>
+							<p>Humidity: {{ task.humidity }}</p>
+						</div>               
+						 </div>						
+						 </template>
+					</div>
+					</div>
+				</div>
+					<div class="clearfix"> </div>
+				</div>
+				</div>
+				<script>		
+		var store = {
+			state: {
+				tempData: []
+			}
+		};
+
+		var router = new VueRouter({
+			mode: 'history',
+			routes: []
+		});
+
+            Vue.component('weather', {
+                template: '#weather-template',
+				data: function() {
+                    return {
+                        //list: [],
+						list:store.state.tempData
+                    };					
+                },
+                created: function() {
+					var currentURL = window.location;
+					var url = new URL(currentURL);
+					var cityname = url.searchParams.get("cityname");
+					if(cityname !=""){
+					this.getAllWoeid(cityname);
+					} else{
+						alert("please select cityname to search");					
+					}
+					
+                },
+                methods: {
+					
+                    fetchTaskList: function(woeidCode) {										
+						
+						this.$http.get('weather.php?command=location&woeid='+woeidCode,                        	
+						function(weather) {
+							store.state.tempData.push(weather);
+                        }.bind(this));
+                    },
+					getAllWoeid: function(countryname){						
+						this.$http.get('weather.php?command=search&keyword='+countryname, function(cdata) {
+						  this.fetchTaskList(cdata[0].woeid, countryname);
+                        }.bind(this));
+					}
+					
+                }
+            })
+            new Vue({
+			 router,
+                el: 'body'			
+            });
+			
+        </script>
+
+	<!-- Content End -->
+</div>
+<!-- End Main Content -->
+
+<!--footer-->
+		<div class="footer">
+		   
+		</div>
+        <!--//footer-->
+	</div>
+	<!-- Bootstrap Core JavaScript -->
+   <script src="js/bootstrap.js"> </script>
+</body>
+</html>
